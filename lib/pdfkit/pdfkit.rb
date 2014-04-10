@@ -1,4 +1,5 @@
 require 'shellwords'
+require 'tempfile'
 
 class PDFKit
 
@@ -33,6 +34,7 @@ class PDFKit
   end
 
   def command(path = nil)
+    tmpfile = Tempfile.new('error_output')
     args = [executable]
     args += @options.to_a.flatten.compact
 
@@ -44,7 +46,8 @@ class PDFKit
 
     args << (path || '-') # Write to file or stdout
 
-    args.shelljoin
+    # errors are sent to a specific temp file to avoid inexplicable crashes
+    args.shelljoin + " 2> #{tmpfile.path}"
   end
 
   def executable
